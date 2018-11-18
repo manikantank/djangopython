@@ -1,0 +1,29 @@
+sudo: no
+dist: trusty
+addons:
+  postgresql: "9.5"
+language: python
+python:
+  - "3.5"
+env:
+  - TOXENV=py35-tests
+  - TOXENV=py35-flake8
+  - TOXENV=py35-isort
+install:
+  - pip install coveralls tox
+before_script:
+  - createuser -U postgres -d djangoproject --superuser
+  - createdb -U postgres -O djangoproject djangoproject
+  - createuser -U postgres -d code.djangoproject --superuser
+  - createdb -U postgres -O code.djangoproject code.djangoproject
+  - psql -U postgres -d code.djangoproject < tracdb/trac.sql
+script:
+  - tox
+after_success: coveralls
+notifications:
+  irc:
+    channels:
+      - "irc.freenode.net#django-websites"
+    on_success: always
+    on_failure: always
+    use_notice: true
